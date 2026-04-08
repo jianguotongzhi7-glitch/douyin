@@ -80,7 +80,7 @@ def extract():
         # 抖音无水印视频的URL格式
         video_url = f"https://aweme.snssdk.com/aweme/v1/play/?video_id={video_id}&ratio=720p&line=0&watermark=0"
         
-        # 返回无水印视频链接
+        # 直接返回无水印视频链接
         print(f"成功获取视频链接: {video_url}")
         return jsonify({'video_url': video_url}), 200
             
