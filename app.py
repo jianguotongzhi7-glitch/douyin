@@ -20,6 +20,28 @@ def extract():
         if not url:
             return jsonify({'error': '请提供抖音链接'}), 400
         
+        # 构建请求头，模拟真实浏览器
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Referer': 'https://www.douyin.com/'
+        }
+        
+        # 使用Session来保持会话
+        session = requests.Session()
+        session.headers.update(headers)
+        
+        # 处理短链接
+        if 'v.douyin.com' in url:
+            # 首先获取短链接的重定向URL
+            response = session.get(url, allow_redirects=True)
+            final_url = response.url
+            print(f"最终URL: {final_url}")
+            url = final_url
+        
         # 提取视频ID
         import re
         video_id = None
