@@ -141,7 +141,11 @@
                     videoUrl.innerHTML = '';
                 } else {
                     error.style.display = 'none';
-                    videoUrl.innerHTML = `<p>无水印视频链接：</p><a href="${data.video_url}" target="_blank">${data.video_url}</a>`;
+                    let resultHtml = `<p>无水印视频链接：</p><a href="${data.video_url}" target="_blank">${data.video_url}</a>`;
+                    if (data.message) {
+                        resultHtml += `<p style="margin-top: 10px; font-size: 14px; color: #666;">${data.message}</p>`;
+                    }
+                    videoUrl.innerHTML = resultHtml;
                 }
             })
             .catch(err => {

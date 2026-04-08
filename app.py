@@ -36,7 +36,12 @@ def extract():
             'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
-            'Referer': 'https://www.douyin.com/'
+            'Referer': 'https://www.douyin.com/',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-User': '?1'
         }
         
         # 使用Session来保持会话
@@ -82,7 +87,7 @@ def extract():
         
         # 直接返回无水印视频链接
         print(f"成功获取视频链接: {video_url}")
-        return jsonify({'video_url': video_url}), 200
+        return jsonify({'video_url': video_url, 'message': '如果链接无法直接在浏览器中打开，可以尝试使用下载工具或添加适当的请求头后访问'}), 200
             
     except Exception as e:
         print(f"提取视频失败: {e}")
