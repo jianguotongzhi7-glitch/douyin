@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify, render_template
 import requests
 from bs4 import BeautifulSoup
 import re
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 app = Flask(__name__)
 
@@ -17,54 +20,41 @@ def extract():
         if not url:
             return jsonify({'error': '请提供抖音链接'}), 400
         
-        # 直接使用抖音无水印解析服务
-        # 这里使用一个免费的解析服务
-        # 注意：免费服务可能会有调用限制
-        api_url = "https://api.amemv.com/aweme/v1/play/"
+        # 提取视频ID
+        import re
+        video_id = None
         
-        # 构建请求参数
-        params = {
-            'url': url,
-            'type': 'video'
-        }
+        # 尝试从链接中提取视频ID
+        patterns = [
+            r'/video/([\d]+)',
+            r'video/([\d]+)',
+            r'\?video_id=([\d]+)',
+            r'video_id=([\d]+)',
+            r'/([\d]+)/'
+        ]
         
-        # 构建请求头
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
-        }
+        for pattern in patterns:
+            match = re.search(pattern, url)
+            if match:
+                video_id = match.group(1)
+                break
         
-        # 请求解析服务
-        response = requests.get(api_url, params=params, headers=headers)
+        if not video_id:
+            # 如果无法提取视频ID，返回错误信息
+            return jsonify({'error': '无法从链接中提取视频ID，请提供包含视频ID的完整链接，例如：https://www.douyin.com/video/1234567890'}), 400
         
-        if response.status_code == 200:
-            # 如果直接返回视频流，返回URL
-            if 'Content-Type' in response.headers and 'video' in response.headers['Content-Type']:
-                return jsonify({'video_url': response.url}), 200
-            else:
-                # 尝试解析JSON响应
-                try:
-                    result = response.json()
-                    if 'data' in result and 'video_url' in result['data']:
-                        return jsonify({'video_url': result['data']['video_url']}), 200
-                    else:
-                        return jsonify({'error': 'API返回格式错误'}), 500
-                except:
-                    # 如果不是JSON，返回请求的URL
-                    return jsonify({'video_url': response.url}), 200
-        else:
-            # 尝试使用备用方法
-            # 直接构建无水印视频URL
-            # 注意：这种方法可能需要根据抖音的实际链接格式进行调整
-            # 这里使用一个示例URL，实际使用时需要根据抖音的链接格式进行修改
-            video_url = "https://example.com/video.mp4"
-            
-            # 提示用户API调用失败，使用示例链接
-            return jsonify({
-                'video_url': video_url,
-                'warning': 'API调用失败，返回示例链接，请手动替换为实际的无水印视频链接'
-            }), 200
+        print(f"提取到的视频ID: {video_id}")
+        
+        # 构建无水印视频URL
+        # 抖音无水印视频的URL格式
+        video_url = f"https://aweme.snssdk.com/aweme/v1/play/?video_id={video_id}&ratio=720p&line=0&watermark=0"
+        
+        # 返回无水印视频链接
+        print(f"成功获取视频链接: {video_url}")
+        return jsonify({'video_url': video_url}), 200
             
     except Exception as e:
+        print(f"提取视频失败: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
