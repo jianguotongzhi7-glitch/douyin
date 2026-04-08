@@ -20,6 +20,15 @@ def extract():
         if not url:
             return jsonify({'error': '请提供抖音链接'}), 400
         
+        # 从分享文本中提取抖音链接
+        import re
+        # 匹配抖音短链接或长链接
+        link_pattern = r'(https?://[\w\-]+(\.[\w\-]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?)'
+        match = re.search(link_pattern, url)
+        if match:
+            url = match.group(1)
+            print(f"提取到的链接: {url}")
+        
         # 构建请求头，模拟真实浏览器
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
