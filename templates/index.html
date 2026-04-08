@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抖音无水印提取工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0069d9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .result h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .video-url {
+            word-wrap: break-word;
+            margin-bottom: 10px;
+        }
+        .video-url a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .video-url a:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>抖音无水印提取工具</h1>
+        <form id="extract-form">
+            <div class="form-group">
+                <label for="douyin-url">抖音视频链接</label>
+                <input type="text" id="douyin-url" placeholder="请输入抖音视频链接" required>
+            </div>
+            <button type="submit">提取无水印视频</button>
+        </form>
+        <div id="loading" class="loading" style="display: none;">正在提取，请稍候...</div>
+        <div id="result" class="result" style="display: none;">
+            <h2>提取结果</h2>
+            <div id="video-url" class="video-url"></div>
+            <div id="error" class="error" style="display: none;"></div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('extract-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const url = document.getElementById('douyin-url').value;
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const videoUrl = document.getElementById('video-url');
+            const error = document.getElementById('error');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            error.style.display = 'none';
+            
+            fetch('/api/extract', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                if (data.error) {
+                    error.style.display = 'block';
+                    error.textContent = data.error;
+                    videoUrl.innerHTML = '';
+                } else {
+                    error.style.display = 'none';
+                    videoUrl.innerHTML = `<p>无水印视频链接：</p><a href="${data.video_url}" target="_blank">${data.video_url}</a>`;
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                error.style.display = 'block';
+                error.textContent = '提取失败，请稍后重试';
+                videoUrl.innerHTML = '';
+            });
+        });
+    </script>
+</body>
+</html>
